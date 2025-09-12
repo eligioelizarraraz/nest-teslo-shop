@@ -157,7 +157,6 @@ export class ProductsService {
   async remove(id: string) {
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
-    return;
   }
 
   private handleExceptions(error: any) {
@@ -167,5 +166,15 @@ export class ProductsService {
     throw new InternalServerErrorException(
       'Unexpected error, check server logs!',
     );
+  }
+
+  // Usar este delete para borrar al momento de ejecutar mi SEED, sólo sería en desarrollo
+  async deleteAllProducts() {
+    const query = this.productImageRepository.createQueryBuilder('product');
+    try {
+      return await query.delete().where({}).execute();
+    } catch (error) {
+      this.handleExceptions(error);
+    }
   }
 }
