@@ -170,7 +170,8 @@ export class ProductsService {
 
   // Usar este delete para borrar al momento de ejecutar mi SEED, sólo sería en desarrollo
   async deleteAllProducts() {
-    const query = this.productImageRepository.createQueryBuilder('product');
+    const query = this.productRepository.createQueryBuilder('product');
+    console.log(query);
     try {
       return await query.delete().where({}).execute();
     } catch (error) {
