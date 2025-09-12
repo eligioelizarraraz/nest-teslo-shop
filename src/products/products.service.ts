@@ -51,12 +51,20 @@ export class ProductsService {
     }
   }
 
-  findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto) {
     const { limit, offset } = paginationDto;
-    return this.productRepository.find({
+    const products = await this.productRepository.find({
       take: limit,
       skip: offset,
+      relations: {
+        images: true,
+      },
     });
+
+    return products.map(({ images, ...rest }) => ({
+      ...rest,
+      images: images?.map((img) => img.url),
+    }));
   }
 
   async findOne(term: string) {
@@ -65,12 +73,13 @@ export class ProductsService {
     if (isUUID(term)) {
       product = await this.productRepository.findOneBy({ id: term });
     } else {
-      const queryBuilder = this.productRepository.createQueryBuilder();
+      const queryBuilder = this.productRepository.createQueryBuilder('prod');
       product = await queryBuilder
         .where(`UPPER(title) = :title or slug = :slug`, {
           title: term.toUpperCase(),
           slug: term.toLowerCase(),
         })
+        .leftJoinAndSelect('prod.images', 'prodImages')
         .getOne();
     }
 
@@ -80,6 +89,14 @@ export class ProductsService {
     return product;
   }
 
+  // Se hace con el propósito de evitar conversiones del resultado desde el findOne, ya que es un método que utilizan otros métodos
+  async findOnePlain(term: string) {
+    const { images = [], ...rest } = await this.findOne(term);
+    return {
+      ...rest,
+      images: images.map((image) => image.url),
+    };
+  }
   async update(id: string, updateProductDto: UpdateProductDto) {
     // Busca un producto por el ID y adicional carga las porpiedades dle DTO
     const product = await this.productRepository.preload({
