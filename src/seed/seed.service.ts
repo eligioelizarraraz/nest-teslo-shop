@@ -18,10 +18,10 @@ export class SeedService {
 
     const insertPromises: Promise<any>[] = [];
 
-    products.forEach((product) => {
-      // Me funciona porque parece como el CreateProductDto
-      insertPromises.push(this.productsService.create(product));
-    });
+    // products.forEach((product) => {
+    //   // Me funciona porque parece como el CreateProductDto
+    //   insertPromises.push(this.productsService.create(product));
+    // });
 
     const results = await Promise.all(insertPromises);
 
