@@ -4,6 +4,7 @@ import { initialData } from './data/seed-data';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SeedService {
@@ -35,10 +36,16 @@ export class SeedService {
 
     const users: User[] = [];
     seedUsers.forEach((user) => {
-      users.push(this.usersRepository.create(user));
+      const { password, ...userData } = user;
+      users.push(
+        this.usersRepository.create({
+          ...userData,
+          password: bcrypt.hashSync(password, 10),
+        }),
+      );
     });
 
-    const dbUsers = await this.usersRepository.save(seedUsers);
+    const dbUsers = await this.usersRepository.save(users);
     // console.log({ seedUsers, users, dbUsers });
 
     return dbUsers[0];
