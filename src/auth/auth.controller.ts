@@ -15,6 +15,11 @@ import { User } from './entities/user.entity';
 import { RawHeader, GetUser } from './decorators';
 import type { IncomingHttpHeaders } from 'node:http';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
+import {
+  META_ROLES,
+  RoleProtected,
+} from './decorators/role-protected.decorator';
+import { ValidRoles } from './interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -51,9 +56,21 @@ export class AuthController {
   }
 
   @Get('private2')
-  @SetMetadata('roles', ['admin', 'super-user'])
+  // @SetMetadata('roles', ['admin', 'super-user'])
+  @RoleProtected(ValidRoles.superUser, ValidRoles.admin)
   @UseGuards(AuthGuard(), UserRoleGuard)
   privateRoute2(@GetUser() user: User) {
+    return {
+      ok: true,
+      user,
+    };
+  }
+
+  @Get('private3')
+  // @SetMetadata('roles', ['admin', 'super-user'])
+  @RoleProtected(ValidRoles.superUser, ValidRoles.admin)
+  @UseGuards(AuthGuard(), UserRoleGuard)
+  privateRoute3(@GetUser() user: User) {
     return {
       ok: true,
       user,
