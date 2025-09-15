@@ -47,6 +47,24 @@ export class MessagesWsGateway
     // DTO creado de acuerdo a lo que se recibirá
     payload: NewMessageDto,
   ) {
-    console.log(client.id, payload);
+    // console.log(client.id, payload);
+
+    // Esto emite únicamente al cliente
+    client.emit('message-from-server', {
+      fullName: 'SOY YO!',
+      message: payload.message || 'no message!',
+    });
+
+    // Emitir a todos MENOS al cliente incial
+    client.broadcast.emit('message-from-server', {
+      fullName: `Soy el cliente ${client.id}`,
+      message: payload.message || 'no message!',
+    });
+
+    // Enviarlo a todos, inluyéndome a mi
+    this.webSocketServer.emit('message-from-server', {
+      fullName: 'Va para todos!!!',
+      message: payload.message || 'no message!',
+    });
   }
 }
