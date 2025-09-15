@@ -23,20 +23,19 @@ export class MessagesWsGateway
     private readonly jwtService: JwtService,
   ) {}
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     // console.log('Cliente conectado: ', client);
     const token = client.handshake.headers.authentication as string;
     let payload: JwtPayload;
 
     try {
       payload = this.jwtService.verify(token);
+      await this.messagesWsService.registerClient(client, payload.id);
     } catch (error) {
       // Se desconecta la conexión y se bota al cliente
       client.disconnect();
       return;
     }
-
-    this.messagesWsService.registerClient(client);
 
     // De esta manera le enviamos la comunicación a nuestro cliente, pero debemos esperar a que la reciba (escuche)
     this.webSocketServer.emit(
@@ -79,7 +78,8 @@ export class MessagesWsGateway
 
     // Enviarlo a todos, inluyéndome a mi
     this.webSocketServer.emit('message-from-server', {
-      fullName: 'Va para todos!!!',
+      // fullName: 'Va para todos!!!',
+      fullName: this.messagesWsService.getUserFullName(client.id),
       message: payload.message || 'no message!',
     });
   }
