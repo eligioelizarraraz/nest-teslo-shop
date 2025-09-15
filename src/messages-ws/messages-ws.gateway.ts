@@ -19,7 +19,10 @@ export class MessagesWsGateway
   constructor(private readonly messagesWsService: MessagesWsService) {}
 
   handleConnection(client: Socket) {
-    // console.log('Cliente conectado: ', client.id);
+    // console.log('Cliente conectado: ', client);
+    const token = client.handshake.headers.authentication as string;
+    console.log({ token });
+
     this.messagesWsService.registerClient(client);
 
     // De esta manera le enviamos la comunicación a nuestro cliente, pero debemos esperar a que la reciba (escuche)
